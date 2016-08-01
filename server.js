@@ -4,23 +4,13 @@
 
 var express = require('express');
 var app = express();
-var PORT = process.env.PORT || 3000;
+var bodyParser = require('body-parser');
+var PORT = process.env.PORT || 3000; // the first is used to get the environment varialbe, which is the PORT#
+var todos = [];
+var todoNextId = 1;
 
-// TODO collections
-var todos = [{
-    id: 1,
-    description: 'Shopping',
-    completed: false
-}, {
-    id: 2,
-    description: 'Play Pokemon go',
-    completed: false
-},{
-    id: 3,
-    description: 'Call mum',
-    completed: true
-}];
-
+// Use the middleware 'body parser' to handle JSON data from post request
+app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
     res.send('Todo API Root');
@@ -51,6 +41,18 @@ app.get('/todos/:id', function (req, res) {
 
 });
 
+// POST /todos - create TODO
+app.post('/todos', function (req, res) {
+    var body = req.body;
+    if (body) {
+        body.id = todoNextId++;
+        todos.push(body);
+    }
+
+    res.json(body);
+});
+
+// Listen to the incoming request on port specified
 app.listen(PORT, function () {
     console.log('Express listening on port: ' + PORT +'!');
 });
