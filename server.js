@@ -30,8 +30,26 @@ app.get('/', function (req, res) {
 app.get('/todos', function (req, res) {
     res.json(todos);
 });
-// GET /todo/:id get a single todo
 
+// GET /todo/:id get a single todo
+app.get('/todos/:id', function (req, res) {
+    var todoId = parseInt(req.params.id, 10);
+    var matchedTodo;
+    
+    todos.forEach(function(todoItem) {
+        if (todoId === todoItem.id) {
+            matchedTodo = todoItem;
+            return;
+        }
+    });
+
+    if (matchedTodo) {
+        res.json(matchedTodo);
+    } else {
+        res.status(404).send();
+    }
+
+});
 
 app.listen(PORT, function () {
     console.log('Express listening on port: ' + PORT +'!');
