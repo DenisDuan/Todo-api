@@ -35,8 +35,22 @@ app.get('/todos/:id', function (req, res) {
     }
 });
 
+// DELETE /todo/:id deletes a single todo
+app.delete('/todos/:id', function (req, res) {
+    var todoId = parseInt(req.params.id, 10);
+    var matchedTodo = _.findWhere(todos, {id: todoId});
+
+    if (matchedTodo) {
+        todos = _.without(todos, matchedTodo);
+        res.json(matchedTodo);
+    } else {
+        res.status(404).json({"error" : "no todo with that given id"});
+    }
+});
+
 // POST /todos - create TODO
 app.post('/todos', function (req, res) {
+    // "_.pick" works on pick out only fields that required 
     var body = _.pick(req.body, ["description", "completed"]);
 
     if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
