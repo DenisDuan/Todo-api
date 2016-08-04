@@ -18,11 +18,12 @@ app.get('/', function (req, res) {
     res.send('Todo API Root');
 });
 
-// GET /todos?completed=true
+// GET /todos?completed=true&q={text to search in description}
 app.get('/todos', function (req, res) {
     var queryParams = req.query;
     var matchedTodos;
     
+    // Find the todos base on the 'completed'
     if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
         matchedTodos = _.where(todos, {completed: true});
     } else if (queryParams.hasOwnProperty('completed')) {
@@ -30,6 +31,13 @@ app.get('/todos', function (req, res) {
     } else {
         matchedTodos = todos;
     }
+
+    // Find todos base on text in description
+    if (queryParams.hasOwnProperty('q') && queryParams.q.trim().length > 0) {
+        matchedTodos = _.filter(matchedTodos, function(todo) {
+           return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) !== -1
+        });
+    } 
 
     res.json(matchedTodos);
 });
