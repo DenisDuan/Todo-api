@@ -18,9 +18,20 @@ app.get('/', function (req, res) {
     res.send('Todo API Root');
 });
 
-// GET /todos : get all todos
+// GET /todos?completed=true
 app.get('/todos', function (req, res) {
-    res.json(todos);
+    var queryParams = req.query;
+    var matchedTodos;
+    
+    if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
+        matchedTodos = _.where(todos, {completed: true});
+    } else if (queryParams.hasOwnProperty('completed')) {
+        matchedTodos = _.where(todos, {completed: false});
+    } else {
+        matchedTodos = todos;
+    }
+
+    res.json(matchedTodos);
 });
 
 // GET /todo/:id get a single todo
@@ -91,9 +102,9 @@ app.put('/todos/:id', function (req, res) {
         return res.status(400).send();
     }
 
-    matchedTodo = _.extend(matchedTodo, validAttributes);
+    _.extend(matchedTodo, validAttributes);
 
-    res.json(body);
+    res.json(matchedTodo);
 });
 
 
