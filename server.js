@@ -22,29 +22,29 @@ app.get('/', function(req, res) {
 // GET /todos?completed=true&q={text to search in description}
 app.get('/todos', function(req, res) {
     var queryParams = req.query;
-    var matchedTodos;
+    var where = {};
 
-    // Find the todos base on the 'completed'
+    // Find todos base on the 'completed' attribute
     if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
-        matchedTodos = _.where(todos, {
-            completed: true
-        });
-    } else if (queryParams.hasOwnProperty('completed')) {
-        matchedTodos = _.where(todos, {
-            completed: false
-        });
-    } else {
-        matchedTodos = todos;
+        where.completed = true;
+    } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
+        where.completed = false;
     }
 
-    // Find todos base on text in description
+    // Add to the query base on the description
     if (queryParams.hasOwnProperty('q') && queryParams.q.trim().length > 0) {
-        matchedTodos = _.filter(matchedTodos, function(todo) {
-            return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) !== -1
-        });
+        where.description = {
+            $like: '%' + queryParams.q.trim() + '%'
+        };
     }
 
-    res.json(matchedTodos);
+    db.todo.findAll({
+        where: where
+    }).then(function(todos) {
+        res.json(todos);
+    }, function(e) {
+        res.status(500).send();
+    });
 });
 
 // GET /todo/:id get a single todo
@@ -56,22 +56,9 @@ app.get('/todos/:id', function(req, res) {
         } else {
             res.status(404).send();
         }
-    }, function (e) {
-         res.status(500).send();   
+    }, function(e) {
+        res.status(500).send();
     })
-
-    /**    
-        var matchedTodo = _.findWhere(todos, {
-            id: todoId
-        });
-
-        if (matchedTodo) {
-            res.json(matchedTodo);
-        } else {
-            res.status(404).send();
-        }
-    */
-
 });
 
 // DELETE /todo/:id deletes a single todo
@@ -102,19 +89,6 @@ app.post('/todos', function(req, res) {
     }, function(e) {
         res.status(400).json(e);
     });
-
-    // if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-    //     return res.status(400).send();
-    // }
-
-    // body.description = body.description.trim();
-
-    // if (body) {
-    //     body.id = todoNextId++;
-    //     todos.push(body);
-    // }
-
-    // res.json(body);
 });
 
 // PUT /todos/:id - update todo
