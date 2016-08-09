@@ -98,31 +98,33 @@ app.post('/todos', function(req, res) {
 app.put('/todos/:id', function(req, res) {
     // "_.pick" works on pick out only fields that required 
     var todoId = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {
-        id: todoId
+    var body = _.pick(req.body, 'description', 'completed');
+    var attribute = {};
+
+    if (body.hasOwnProperty('completed')) {
+        attribute.completed = body.completed;
+    }
+
+    if (body.hasOwnProperty('description')) {
+        attribute.description = body.description;
+    }
+
+    db.todo.findById(todoId).then(function(todo) {
+        // Update the record if the record exist
+        if (todo) {
+            // Execute the promise after upate
+            todo.update(attribute).then(function(todo) {
+                res.json(todo.toJSON()); // Send the updated record back if updated successfully 
+            }, function(e) {
+                res.status(400).json(e); // Send 400 if somehow update failed.
+            });
+        } else {
+            res.status(404).send();
+        }
+    }, function() {
+        res.status(500).send(); // Send 500 if anything when wrong when fetch the record
     });
-    if (!matchedTodo) {
-        return res.status(400).send();
-    }
 
-    var body = _.pick(req.body, ["description", "completed"]);
-    var validAttributes = {};
-
-    if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
-        validAttributes.completed = body.completed;
-    } else if (body.hasOwnProperty('completed')) {
-        return res.status(400).send();
-    }
-
-    if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
-        validAttributes.description = body.description;
-    } else if (body.hasOwnProperty('description')) {
-        return res.status(400).send();
-    }
-
-    _.extend(matchedTodo, validAttributes);
-
-    res.json(matchedTodo);
 });
 
 // Sync database 
