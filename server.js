@@ -19,6 +19,10 @@ app.get('/', function(req, res) {
     res.send('Todo API Root');
 });
 
+/**
+ * The following part is for API for TODO
+ */
+
 // GET /todos?completed=true&q={text to search in description}
 app.get('/todos', function(req, res) {
     var queryParams = req.query;
@@ -126,6 +130,24 @@ app.put('/todos/:id', function(req, res) {
     });
 
 });
+
+
+/**
+ * The following part is for API for USER
+ */
+
+// POST /users - create USER
+app.post('/users', function(req, res) {
+    // "_.pick" works on pick out only fields that required 
+    var body = _.pick(req.body, ["email", "password"]);
+
+    db.user.create(body).then(function(user) {
+        res.json(user.toJSON());
+    }, function(e) {
+        res.status(400).json(e);
+    });
+});
+
 
 // Sync database 
 db.sequelize.sync().then(function() {
