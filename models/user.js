@@ -26,7 +26,9 @@ module.exports = function(sequelize, DataTypes) {
             validate: {
                 len: [7, 100]
             },
+            // Happen before actually setting the value to field
             set: function(value) {
+                // Salt and hast the user entered password
                 var salt = bcrypt.genSaltSync(10);
                 var hashedPassword = bcrypt.hashSync(value, salt);
                 this.setDataValue('password', value);
@@ -48,9 +50,13 @@ module.exports = function(sequelize, DataTypes) {
                 }
             }
         },
+        /**
+         * This shows how to add custom model method
+         */
         instanceMethods: {
             toPublicJSON: function() {
                 var json = this.toJSON();
+                // Only shows certain data to the user
                 return _.pick(json, ['id', "email", 'createdAt', 'updatedAt']);
             }
         }
