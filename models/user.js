@@ -19,5 +19,19 @@ module.exports = function(sequelize, DataTypes) {
                 len: [7, 100]
             }
         }
+    }, {
+        /**
+         * Hooks (also known as callbacks or lifecycle events), 
+         * are functions which are called before and after calls in sequelize are executed.
+         * 
+         * The following hook use to normalize email so that the "unique" validation can be performed. 
+         */
+        hooks: {
+            beforeValidate: function(user, options) {
+                if (typeof user.email === 'string') {
+                    user.email = user.email.toLowerCase();
+                }
+            }
+        }
     });
 };
